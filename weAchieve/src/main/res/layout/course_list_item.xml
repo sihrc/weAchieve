@@ -14,9 +14,8 @@
         android:layout_alignParentBottom="true"
         android:textStyle="bold"
         android:textSize="22dp"
-        android:textColor="#FFFFFF"
         android:padding="10dp"
         android:text="blue thingy"
-        android:background="#336699" />
+        android:textColor="#336699" />
 
 </LinearLayout>

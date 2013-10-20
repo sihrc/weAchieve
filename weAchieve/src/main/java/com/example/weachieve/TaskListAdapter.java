@@ -1,7 +1,6 @@
 package com.example.weachieve;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,16 +8,16 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Created by chris on 10/14/13.
  */
 public class TaskListAdapter extends ArrayAdapter<Task> {
     private final Context context;
-    private List<Task> tasks;
+    private ArrayList<Task> tasks;
 
-    public TaskListAdapter(Context context, List<Task> tasks){
+    public TaskListAdapter(Context context, ArrayList<Task> tasks){
         super(context, R.layout.task_list_item, tasks);
         this.context = context;
         this.tasks = tasks;
@@ -29,7 +28,7 @@ public class TaskListAdapter extends ArrayAdapter<Task> {
         ImageView people;
     }
 
-    public void refill(List<Task> tasks){
+    public void refill(ArrayList<Task> tasks){
         this.tasks = tasks;
         notifyDataSetChanged();
     }
@@ -57,7 +56,7 @@ public class TaskListAdapter extends ArrayAdapter<Task> {
             holder = (TaskHolder) taskRow.getTag();
         }
 
-        Task task = tasks.get(position);
+        Task task = this.tasks.get(position);
 
         holder.title.setText(task.getName());
         holder.course.setText(task.getClassName());

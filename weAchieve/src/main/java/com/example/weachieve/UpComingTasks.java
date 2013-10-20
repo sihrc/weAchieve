@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -28,7 +29,7 @@ public class UpComingTasks extends Activity {
         user = getSharedPreferences("PREFERENCE", MODE_PRIVATE).getString("user", new StringBuilder().toString());
 
         db.open();
-        List<Task> tasks = db.getUserSessions(user);
+        ArrayList<Task> tasks = db.getUserSessions(user);
 
         ListView taskList = (ListView) findViewById(R.id.upcomingTasks);
         taskListAdapter = new TaskListAdapter(this, tasks);

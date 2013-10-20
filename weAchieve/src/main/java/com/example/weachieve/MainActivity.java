@@ -37,8 +37,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -59,6 +62,7 @@ public class MainActivity extends Activity {
     ArrayList<Task> userSessions = new ArrayList<Task>();
 
     //Adapters
+    ListView upcomingSessions;
     CourseExpListAdapter expAdapter;
     TaskListAdapter taskAdapter;
 
@@ -71,7 +75,7 @@ public class MainActivity extends Activity {
         firstRun();
 
         //Get Enrolled Courses before user to show dialog on top.
-        courses = getCourses();
+        getCourses();
 
         //Check for User Authentication
         user = getUser();
@@ -83,8 +87,8 @@ public class MainActivity extends Activity {
 
         //Populate Upcoming Tasks
         //ListView Adapter
-        ListView upcomingSessions = (ListView) findViewById(R.id.upcomingTasks);
-        taskAdapter = new TaskListAdapter(this, this.userSessions);
+        upcomingSessions = (ListView) findViewById(R.id.upcomingTasks);
+        MainActivity.this.taskAdapter = new TaskListAdapter(this, userSessions);
         upcomingSessions.setAdapter(taskAdapter);
 
         //Populate Courses
@@ -100,6 +104,7 @@ public class MainActivity extends Activity {
             public void onClick(View view) {
                 Intent in = new Intent(MainActivity.this,UpComingTasks.class);
                 startActivity(in);
+                rePopulate();
             }
         });
 
@@ -110,6 +115,8 @@ public class MainActivity extends Activity {
                 Intent in = new Intent(getApplicationContext(), TaskDetailView.class);
                 in.putExtra("id", MainActivity.this.userSessions.get(i).getId());
                 startActivity(in);
+                rePopulate();
+
             }
         });
 
@@ -122,12 +129,13 @@ public class MainActivity extends Activity {
                 if (task.getName().equals("Add New Session")) {
                     in = new Intent(getApplicationContext(), CreateNewTask.class);
                     in.putExtra("course", task.getClassName());
-                    in.putExtra("people", user);
+                    in.putExtra("people", MainActivity.this.user);
                 } else {
                     in = new Intent(getApplicationContext(), TaskDetailView.class);
                     in.putExtra("id", task.getId());
                 }
                 startActivity(in);
+                rePopulate();
                 return false;
             }
         });
@@ -222,19 +230,15 @@ public class MainActivity extends Activity {
             }
 
             protected void onPostExecute(Void voids){
-                getUserSessions();
-                getCourseSessions();
-                expAdapter.refill(getCourses(),MainActivity.this.courseSessions);
-                taskAdapter.refill(MainActivity.this.userSessions);
+                rePopulate();
             }
         }.execute();
 
     }
 
-
     //First Run
     public void firstRun(){
-        if (getSharedPreferences("PREFERENCE", MODE_PRIVATE).getString("courses", "^").equals("^"))
+        if (getSharedPreferences("PREFERENCE", MODE_PRIVATE).getString("courses", "").equals(""))
             addCourse();
         if (getSharedPreferences("PREFERENCE", MODE_PRIVATE).getString("user", "").equals(""))
             userLogin();
@@ -251,7 +255,7 @@ public class MainActivity extends Activity {
 
     // Get User Sessions
     public void getUserSessions(){
-        this.userSessions = db.getUserSessions(getUser());
+        MainActivity.this.userSessions = db.getUserSessions(MainActivity.this.user);
     }
 
     //Authentication Methods
@@ -268,7 +272,7 @@ public class MainActivity extends Activity {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         EditText userInput = (EditText) view.findViewById(R.id.username);
                         EditText passInput = (EditText) view.findViewById(R.id.password);
-
+                        MainActivity.this.user = userInput.getText().toString();
                         //Save to preference
                         getSharedPreferences("PREFERENCE", MODE_PRIVATE)
                                 .edit()
@@ -288,13 +292,19 @@ public class MainActivity extends Activity {
     }
 
     //Getting Courses
-    ArrayList<String> getCourses(){
-        String rawString = getSharedPreferences("PREFERENCE", MODE_PRIVATE).getString("courses", "^");
-
-        //Check if Initial "^" is at the beginning
-        if (rawString.charAt(0) == '^') Log.i("COURSE ERROR","Something might be wrong with the courses string.");
-
-        return new ArrayList<String>(Arrays.asList(rawString.substring(1).split("#")));
+    public ArrayList<String> getUnique (ArrayList<String> raw){
+        LinkedHashSet<String> unique = new LinkedHashSet<String>(raw);
+        return new ArrayList(Arrays.asList(unique.toArray()));
+    }
+    public void getCourses(){
+        String rawString = getSharedPreferences("PREFERENCE", MODE_PRIVATE).getString("courses", "");
+        //Check if Initial "" is at the beginning
+        //Log.i("COURSE ERROR","Something might be wrong with the courses string.");
+        Log.i("RawString",rawString);
+        if (rawString.equals(""))
+            this.courses = new ArrayList<String>();
+        else
+            this.courses = getUnique(new ArrayList<String>(Arrays.asList(rawString.split("#"))));
     }
     public void addCourse(){
         //Fake Classes for now, should get from server
@@ -302,6 +312,7 @@ public class MainActivity extends Activity {
         databaseCourses.add("ModSim");
         databaseCourses.add("MobilePrototyping");
         databaseCourses.add("ModCon");
+        for (String course : this.courses)databaseCourses.remove(course);
 
         //Single Course Input
         final AutoCompleteTextView courseList = new AutoCompleteTextView(MainActivity.this);
@@ -326,8 +337,9 @@ public class MainActivity extends Activity {
                         //Save to preference
                         getSharedPreferences("PREFERENCE", MODE_PRIVATE)
                                 .edit()
-                                .putString("courses", getSharedPreferences("PREFERENCE", MODE_PRIVATE).getString("course", "^") + newCourse + "#")
+                                .putString("courses", getSharedPreferences("PREFERENCE", MODE_PRIVATE).getString("courses", "") + newCourse + "#")
                                 .commit();
+                        rePopulate();
                     }
                 }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
@@ -338,6 +350,19 @@ public class MainActivity extends Activity {
     public void addCourseToServer(String addCourse){
         //Post Request to Server...
     } //UnImplemented
+
+    //Repopulate Views
+    public void rePopulate(){
+        db.open();
+        getCourses();
+        getUserSessions();
+        getCourseSessions();
+
+        taskAdapter = new TaskListAdapter(this, this.userSessions);
+        upcomingSessions.setAdapter(taskAdapter);
+        expAdapter.refill(MainActivity.this.courses,MainActivity.this.courseSessions);
+
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -351,10 +376,10 @@ public class MainActivity extends Activity {
         switch (item.getItemId()) {
             case R.id.action_Remove_Course:
 
+                ListView listView = new ListView(MainActivity.this);
                 final Dialog dialog = new Dialog(MainActivity.this);
-                dialog.setContentView(R.layout.course_list);
-                dialog.setTitle("Remove Course");
-                ListView listView = (ListView) dialog.findViewById(R.id.list);
+                dialog.setContentView(listView);
+                dialog.setTitle("Remove a Course");
 
                 ArrayAdapter<String> ad = new ArrayAdapter<String>(this, R.layout.course_list_item , R.id.singleItem, courses);
                 listView.setAdapter(ad);
@@ -363,14 +388,10 @@ public class MainActivity extends Activity {
                     @Override
                     public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
                         //do something on click
-                        ArrayList myCourses = new ArrayList(courses);
-                        myCourses.remove(arg2);
-                        Log.i("removeCourse1", myCourses.toString());
-                        courses = myCourses;
-                        Log.i("removeCourse2", courses.toString());
+                        MainActivity.this.courses.remove(arg2);
                         StringBuilder csvList = new StringBuilder();
                         csvList.append("");
-                        for(String item : courses){
+                        for(String item : MainActivity.this.courses){
                             csvList.append(item);
                             csvList.append("#");
                         }
@@ -381,7 +402,8 @@ public class MainActivity extends Activity {
 
                         getUserSessions();
                         getCourseSessions();
-                        expAdapter.refill(getCourses(),MainActivity.this.courseSessions);
+                        getCourses();
+                        expAdapter.refill(MainActivity.this.courses,MainActivity.this.courseSessions);
                         dialog.dismiss();
                     }
                 });
@@ -392,41 +414,12 @@ public class MainActivity extends Activity {
                 addCourse();
                 getUserSessions();
                 getCourseSessions();
-                expAdapter.refill(getCourses(),MainActivity.this.courseSessions);
+                getCourses();
+                expAdapter.refill(MainActivity.this.courses,MainActivity.this.courseSessions);
                 return true;
 
             case R.id.action_change_user:
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle("Enter User Name");
-
-                final EditText input = new EditText(this);
-                // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-                input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_CLASS_TEXT);
-                builder.setView(input);
-
-                // Set up the buttons
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String userName= input.getText().toString();
-                        MainActivity.this.user = userName;
-                        getSharedPreferences("PREFERENCE", MODE_PRIVATE)
-                                .edit()
-                                .putString("user", userName)
-                                .commit();
-                        getSharedPreferences("PREFERENCE", MODE_PRIVATE)
-                                .edit()
-                                .putString("courses", "")
-                                .commit();
-
-                    }
-                });
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
-                });
-                builder.show();
+                userLogin();
                 return true;
         }
         return true;
