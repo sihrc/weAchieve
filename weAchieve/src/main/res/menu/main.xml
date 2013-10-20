@@ -1,0 +1,14 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_change_user"
+        android:title="Change User">
+    </item>
+    <item
+        android:id="@+id/action_Add_Course"
+        android:title="Add Course">
+    </item>
+    <item
+        android:id="@+id/action_Remove_Course"
+        android:title="Remove Course">
+    </item>
+</menu>

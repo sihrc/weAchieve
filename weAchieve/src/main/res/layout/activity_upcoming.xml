@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<TextView
+    android:text="Upcoming Sessions"
+    android:layout_width = "fill_parent"
+    android:layout_height = "wrap_content"
+    android:textSize = "30sp"
+    android:layout_marginLeft= "10dp"
+    android:layout_marginTop= "10dp"
+    />
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:background="@android:color/black"/>
+
+    <ListView
+        android:id = "@+id/upcomingTasks"
+        android:layout_width = "fill_parent"
+        android:layout_height = "fill_parent"
+        android:layout_marginLeft = "10dp"
+        android:layout_marginRight = "20dp"
+        />
+
+</LinearLayout>
