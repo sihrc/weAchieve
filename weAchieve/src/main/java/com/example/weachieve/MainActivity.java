@@ -26,8 +26,12 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.protocol.HTTP;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,7 +54,11 @@ public class MainActivity extends Activity {
     DBHandler db = new DBHandler(this);
 
     //Authentication Information
+    String username;
+    String pass;
+
     String user;
+
 
     //Courses user is enrolled in
     ArrayList<String> courses;
@@ -150,6 +158,7 @@ public class MainActivity extends Activity {
 
 
     }
+
     //Syncing the Server with the Database
     public void syncWithServer(){
         new AsyncTask<Void, Void, Void>(){
@@ -273,6 +282,7 @@ public class MainActivity extends Activity {
                         EditText userInput = (EditText) view.findViewById(R.id.username);
                         EditText passInput = (EditText) view.findViewById(R.id.password);
                         MainActivity.this.user = userInput.getText().toString();
+                        MainActivity.this.pass = passInput.getText().toString();
                         //Save to preference
                         getSharedPreferences("PREFERENCE", MODE_PRIVATE)
                                 .edit()
@@ -281,7 +291,7 @@ public class MainActivity extends Activity {
 
                         getSharedPreferences("PREFERENCE", MODE_PRIVATE)
                                 .edit()
-                                .putString("password", passInput.getText().toString())
+                                .putString("pass", passInput.getText().toString())
                                 .commit();
                     }
                 }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -290,7 +300,53 @@ public class MainActivity extends Activity {
             }
         }).show();
     }
+    public void authenticate(){
+        new AsyncTask<Void, Void, Void>() {
+            HttpResponse response;
+            InputStream inputStream = null;
+            String result = "";
+            HttpClient client = new DefaultHttpClient();
 
+            @Override
+            protected void onPreExecute(){
+                HttpConnectionParams.setConnectionTimeout(client.getParams(), 10000);
+            }
+            protected Void doInBackground(Void... voids) {
+                //Website URL and header configuration
+                String website = "https://olinapps.herokuapp.com/api/exchangelogin";
+                HttpPost get_auth = new HttpPost(website);
+                get_auth.setHeader("Content-type","application/json");
+
+                //Create and execute POST with JSON Post Package
+                JSONObject auth = new JSONObject();
+                try{
+                    auth.put("username",MainActivity.this.user);
+                    auth.put("password",MainActivity.this.pass);
+                    StringEntity se = new StringEntity(auth.toString());
+                    se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,"application/json"));
+                    get_auth.setEntity(se);
+                }catch(Exception e){e.printStackTrace();}
+                try{response = client.execute(get_auth);}catch(Exception e){e.printStackTrace();}
+
+                //Read the response
+                HttpEntity entity = response.getEntity();
+
+                try{inputStream = entity.getContent();}catch(Exception e){e.printStackTrace();}
+                try{BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"),8);
+                    StringBuilder sb = new StringBuilder(); String line; String nl = System.getProperty("line.separator");
+
+                    while ((line = reader.readLine())!= null){
+                        sb.append(line);
+                        sb.append(nl);
+                    }
+                    result = sb.toString();}catch(Exception e){e.printStackTrace();}
+
+                //Convert Result to JSON
+
+                return null;
+            }
+        }.execute();
+    } //Unimplemented
     //Getting Courses
     public ArrayList<String> getUnique (ArrayList<String> raw){
         LinkedHashSet<String> unique = new LinkedHashSet<String>(raw);
