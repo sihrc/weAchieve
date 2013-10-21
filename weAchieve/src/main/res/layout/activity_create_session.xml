@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/parent">
+    <TextView
+        android:id = "@+id/addTitle"
+        android:layout_height = "wrap_content"
+        android:layout_width = "fill_parent"
+        android:text = "Create a new Session"
+        android:textSize = "30sp"
+        android:layout_marginTop="5dp"
+        android:padding = "5dp"
+        />
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:background="@android:color/black"/>
+
+    <LinearLayout
+        android:orientation = "horizontal"
+        android:layout_width = "fill_parent"
+        android:layout_height = "wrap_content"
+        >
+        <TextView
+            android:layout_width = "90dp"
+            android:layout_marginLeft="10dp"
+            android:layout_height = "wrap_content"
+            android:text = "Name"
+            android:textSize = "25sp"
+            android:padding="8dp"
+            />
+        <EditText
+            android:id = "@+id/inputName"
+            android:layout_width = "fill_parent"
+            android:layout_height = "wrap_content"
+            android:textSize = "25sp"
+            android:hint = "Session Name"
+            android:gravity = "center"
+            />
+        </LinearLayout>
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="15dp"
+        android:background = "#e9e9e9"
+        />
+
+
+    <LinearLayout
+        android:orientation = "horizontal"
+        android:layout_width = "fill_parent"
+        android:layout_height = "wrap_content"
+        >
+        <TextView
+            android:layout_width = "90dp"
+            android:layout_marginLeft="10dp"
+            android:layout_height = "wrap_content"
+            android:text = "Place"
+            android:textSize = "25sp"
+            android:padding="8dp"
+            />
+        <EditText
+            android:id = "@+id/inputLocation"
+            android:layout_width = "fill_parent"
+            android:layout_height = "wrap_content"
+            android:textSize = "25sp"
+            android:hint = "Meeting Location"
+            android:gravity = "center"
+            />
+    </LinearLayout>
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="15dp"
+        android:background = "#e9e9e9"/>
+
+    <LinearLayout
+        android:orientation = "horizontal"
+        android:layout_width = "fill_parent"
+        android:layout_height = "wrap_content"
+        >
+        <TextView
+            android:layout_width = "90dp"
+            android:layout_marginLeft="10dp"
+            android:layout_height = "wrap_content"
+            android:text = "Date"
+            android:textSize = "25sp"
+            android:padding="8dp"
+            />
+        <EditText
+            android:id = "@+id/inputDate"
+            android:layout_width = "fill_parent"
+            android:layout_height = "wrap_content"
+            android:textSize = "25sp"
+            android:gravity = "center"
+            android:hint = "Tap to set Date"
+            android:clickable="true"
+            />
+    </LinearLayout>
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="15dp"
+        android:background = "#e9e9e9"/>
+
+
+
+    <LinearLayout
+        android:orientation = "horizontal"
+        android:layout_width = "fill_parent"
+        android:layout_height = "wrap_content"
+        >
+        <TextView
+            android:layout_width = "90dp"
+            android:layout_marginLeft="10dp"
+            android:layout_height = "wrap_content"
+            android:text = "Start"
+            android:textSize = "25sp"
+            android:padding="8dp"
+            />
+        <EditText
+            android:id = "@+id/inputStart"
+            android:layout_width = "fill_parent"
+            android:layout_height = "wrap_content"
+            android:textSize = "25sp"
+            android:hint = "Tap to set start time"
+            android:gravity = "center"
+            />
+
+    </LinearLayout>
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="15dp"
+        android:background = "#e9e9e9"/>
+    <LinearLayout
+        android:orientation = "horizontal"
+        android:layout_width = "fill_parent"
+        android:layout_height = "wrap_content"
+        >
+        <TextView
+            android:layout_width = "90dp"
+            android:layout_marginLeft="10dp"
+            android:layout_height = "wrap_content"
+            android:text = "End"
+            android:textSize = "25sp"
+            android:padding="8dp"
+            />
+        <EditText
+            android:id = "@+id/inputEnd"
+            android:layout_width = "fill_parent"
+            android:layout_height = "wrap_content"
+            android:textSize = "25sp"
+            android:hint = "Tap to set end time"
+            android:gravity = "center"
+            />
+    </LinearLayout>
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="5dp"
+        android:background = "#e9e9e9"/>
+    <LinearLayout
+        android:orientation = "horizontal"
+        android:layout_height = "fill_parent"
+        android:layout_width = "fill_parent"
+        >
+    <Button
+        android:id="@+id/cancel"
+        android:textSize = "30sp"
+        android:layout_gravity="bottom"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
+        android:layout_width = "100dp"
+        android:layout_height = "100dp"
+        android:background = "@drawable/cancel"/>
+    <View
+        android:layout_width="3dp"
+        android:layout_height="100dp"
+        android:layout_gravity = "bottom"
+        android:background = "#e9e9e9"
+        />
+    <Button
+        android:id="@+id/save"
+        android:layout_gravity = "center"
+        android:textSize = "30sp"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
+        android:layout_width = "fill_parent"
+        android:layout_height = "100dp"
+        android:background = "@drawable/save"/>
+    </LinearLayout>
+</LinearLayout>
