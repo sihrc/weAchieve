@@ -24,7 +24,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.example.weachieve.CreateNewTask"
+        <activity android:name=".CreateNewSession"
             android:parentActivityName="com.example.weachieve.MainActivity" >
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
@@ -32,7 +32,7 @@
                 android:value="com.example.weachieve.MainActivity" />
 
         </activity>
-        <activity android:name="com.example.weachieve.UpComingTasks"
+        <activity android:name=".UpComingSessions"
             android:parentActivityName="com.example.weachieve.MainActivity" >
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
@@ -40,7 +40,7 @@
                 android:value="com.example.weachieve.MainActivity" />
 
         </activity>
-        <activity android:name="com.example.weachieve.TaskDetailView"
+        <activity android:name=".SessionDetailView"
             android:parentActivityName="com.example.weachieve.MainActivity" >
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data

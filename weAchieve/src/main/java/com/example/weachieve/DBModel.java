@@ -10,15 +10,15 @@ import android.util.Log;
  */
 public class DBModel extends SQLiteOpenHelper {
 
-    public static final String TABLE_NAME = "tasks";
-    public static final String TASK_ID = "id";
-    public static final String TASK_NAME = "name";
-    public static final String TASK_PEOPLE = "people";
-    public static final String TASK_DATE = "date";
-    public static final String TASK_START = "startTime";
-    public static final String TASK_END = "endTime";
-    public static final String TASK_LOCATION = "location";
-    public static final String TASK_CLASS = "class";
+    public static final String TABLE_NAME = "sessions";
+    public static final String SESSION_ID = "id";
+    public static final String SESSION_NAME = "name";
+    public static final String SESSION_PEOPLE = "people";
+    public static final String SESSION_DATE = "date";
+    public static final String SESSION_START = "startTime";
+    public static final String SESSION_END = "endTime";
+    public static final String SESSION_LOCATION = "location";
+    public static final String SESSION_CLASS = "class";
 
     private static final String DATABASE_NAME = "weAchieve";
     private static final int DATABASE_VERSION = 1;
@@ -27,14 +27,14 @@ public class DBModel extends SQLiteOpenHelper {
     private static final String DATABASE_CREATE = "create table "
             + TABLE_NAME + "("
             + "_id" + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-            + TASK_ID + " TEXT NOT NULL, "
-            + TASK_NAME + " TEXT NOT NULL, "
-            + TASK_PEOPLE + " TEXT NOT NULL, "
-            + TASK_START + " TEXT NOT NULL, "
-            + TASK_END + " TEXT NOT NULL, "
-            + TASK_DATE + " TEXT NOT NULL, "
-            + TASK_LOCATION + " TEXT NOT NULL, "
-            + TASK_CLASS + " TEXT NOT NULL);";
+            + SESSION_ID + " TEXT NOT NULL, "
+            + SESSION_NAME + " TEXT NOT NULL, "
+            + SESSION_PEOPLE + " TEXT NOT NULL, "
+            + SESSION_START + " TEXT NOT NULL, "
+            + SESSION_END + " TEXT NOT NULL, "
+            + SESSION_DATE + " TEXT NOT NULL, "
+            + SESSION_LOCATION + " TEXT NOT NULL, "
+            + SESSION_CLASS + " TEXT NOT NULL);";
 
     //Default Constructor
     public DBModel(Context context){

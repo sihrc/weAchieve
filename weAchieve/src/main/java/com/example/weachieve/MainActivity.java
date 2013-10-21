@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
-import android.text.InputType;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -41,11 +40,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -55,24 +51,22 @@ public class MainActivity extends Activity {
 
     //Authentication Information
     String username;
-    String pass;
-
-    String user;
-
+    String password;
+    String fullName;
 
     //Courses user is enrolled in
     ArrayList<String> courses;
 
     //HashMap for course sessions
-    HashMap<String, ArrayList<Task>> courseSessions = new HashMap<String, ArrayList<Task>>();
+    HashMap<String, ArrayList<Session>> courseSessions = new HashMap<String, ArrayList<Session>>();
 
     //ArrayList for user sessions
-    ArrayList<Task> userSessions = new ArrayList<Task>();
+    ArrayList<Session> userSessions = new ArrayList<Session>();
 
     //Adapters
     ListView upcomingSessions;
     CourseExpListAdapter expAdapter;
-    TaskListAdapter taskAdapter;
+    SessionListAdapter sessionAdapter;
 
     protected void onCreate(Bundle savedInstanceState) {
         //Setting the view
@@ -86,22 +80,22 @@ public class MainActivity extends Activity {
         getCourses();
 
         //Check for User Authentication
-        user = getUser();
+        getUser();
 
         //Grab Database Sessions for Courses
         db.open();
         getCourseSessions();
         getUserSessions();
 
-        //Populate Upcoming Tasks
+        //Populate Upcoming Sessions
         //ListView Adapter
-        upcomingSessions = (ListView) findViewById(R.id.upcomingTasks);
-        MainActivity.this.taskAdapter = new TaskListAdapter(this, userSessions);
-        upcomingSessions.setAdapter(taskAdapter);
+        upcomingSessions = (ListView) findViewById(R.id.upcomingSessions);
+        MainActivity.this.sessionAdapter = new SessionListAdapter(this, userSessions);
+        upcomingSessions.setAdapter(sessionAdapter);
 
         //Populate Courses
         //Expandable ListView Adapter
-        ExpandableListView expListView = (ExpandableListView) findViewById(R.id.allTasks);
+        ExpandableListView expListView = (ExpandableListView) findViewById(R.id.allSessions);
         expAdapter = new CourseExpListAdapter(this, courses, courseSessions);
         expListView.setAdapter(expAdapter);
 
@@ -110,7 +104,8 @@ public class MainActivity extends Activity {
         seeAll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent in = new Intent(MainActivity.this,UpComingTasks.class);
+                Intent in = new Intent(MainActivity.this, UpComingSessions.class);
+                in.putExtra("fullName", MainActivity.this.fullName);
                 startActivity(in);
                 rePopulate();
             }
@@ -120,7 +115,7 @@ public class MainActivity extends Activity {
         upcomingSessions.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Intent in = new Intent(getApplicationContext(), TaskDetailView.class);
+                Intent in = new Intent(getApplicationContext(), SessionDetailView.class);
                 in.putExtra("id", MainActivity.this.userSessions.get(i).getId());
                 startActivity(in);
                 rePopulate();
@@ -133,14 +128,14 @@ public class MainActivity extends Activity {
             @Override
             public boolean onChildClick(ExpandableListView expandableListView, View view, int i, int i2, long l) {
                 Intent in;
-                Task task = MainActivity.this.courseSessions.get(MainActivity.this.courses.get(i)).get(i2);
-                if (task.getName().equals("Add New Session")) {
-                    in = new Intent(getApplicationContext(), CreateNewTask.class);
-                    in.putExtra("course", task.getClassName());
-                    in.putExtra("people", MainActivity.this.user);
+                Session session = MainActivity.this.courseSessions.get(MainActivity.this.courses.get(i)).get(i2);
+                if (session.getName().equals("Add New Session")) {
+                    in = new Intent(getApplicationContext(), CreateNewSession.class);
+                    in.putExtra("course", session.getClassName());
+                    in.putExtra("people", MainActivity.this.fullName);
                 } else {
-                    in = new Intent(getApplicationContext(), TaskDetailView.class);
-                    in.putExtra("id", task.getId());
+                    in = new Intent(getApplicationContext(), SessionDetailView.class);
+                    in.putExtra("id", session.getId());
                 }
                 startActivity(in);
                 rePopulate();
@@ -177,9 +172,9 @@ public class MainActivity extends Activity {
             protected Void doInBackground(Void... voids){
                 //Website URL and header configuration
                 String website = "http://weachieveserver1.herokuapp.com/sessions";
-                HttpGet all_tasks = new HttpGet(website);
-                all_tasks.setHeader("Content-type","application/json");
-                try{response = client.execute(all_tasks);}catch(Exception e){e.printStackTrace();}
+                HttpGet all_sessions = new HttpGet(website);
+                all_sessions.setHeader("Content-type", "application/json");
+                try{response = client.execute(all_sessions);}catch(Exception e){e.printStackTrace();}
 
                 //Parsing the response
 
@@ -206,7 +201,6 @@ public class MainActivity extends Activity {
                         jArray = jsonObj.getJSONArray("sessions");
                     } catch(JSONException e) {
                         e.printStackTrace();
-                        Log.i("JSONPARSER", "ERROR PARSING JSON");
                     }
                     db.deleteSessions();
                     for (int i=0; i < jArray.length(); i++) {
@@ -220,9 +214,7 @@ public class MainActivity extends Activity {
                                 userList.append(userArray.getString(j));
                                 userList.append("#");
                             }
-
-                            Log.i("userList", userList.toString());
-                            db.addTask(new Task(
+                            db.addSession(new Session(
                                     sessionObject.getString("_id"),
                                     sessionObject.getString("task"),
                                     userList.toString(),
@@ -247,29 +239,31 @@ public class MainActivity extends Activity {
 
     //First Run
     public void firstRun(){
-        if (getSharedPreferences("PREFERENCE", MODE_PRIVATE).getString("courses", "").equals(""))
+        getCourses();
+        getUser();
+        if (MainActivity.this.courses.size() < 1)
             addCourse();
-        if (getSharedPreferences("PREFERENCE", MODE_PRIVATE).getString("user", "").equals(""))
+        if (MainActivity.this.fullName.equals(""))
             userLogin();
     }
 
     // Get Course Sessions
     public void getCourseSessions(){
         for (String course : this.courses){
-            ArrayList<Task> tasks = db.getCourseSessions(course);
-            tasks.add(new Task("","Add New Session","","","","","",course));
-            this.courseSessions.put(course,tasks);
+            ArrayList<Session> sessions = db.getCourseSessions(course);
+            sessions.add(new Session("","Add New Session","","","","","",course));
+            this.courseSessions.put(course, sessions);
         }
     }
 
     // Get User Sessions
     public void getUserSessions(){
-        MainActivity.this.userSessions = db.getUserSessions(MainActivity.this.user);
+        MainActivity.this.userSessions = db.getUserSessions(MainActivity.this.fullName);
     }
 
     //Authentication Methods
-    public String getUser(){
-        return getSharedPreferences("PREFERENCE", MODE_PRIVATE).getString("user", "");
+    public void getUser(){
+        MainActivity.this.fullName = getSharedPreferences("PREFERENCE", MODE_PRIVATE).getString("fullName", "");
     }
     public void userLogin(){
         //Inflate Dialog View
@@ -281,27 +275,31 @@ public class MainActivity extends Activity {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         EditText userInput = (EditText) view.findViewById(R.id.username);
                         EditText passInput = (EditText) view.findViewById(R.id.password);
-                        MainActivity.this.user = userInput.getText().toString();
-                        MainActivity.this.pass = passInput.getText().toString();
+                        MainActivity.this.username = userInput.getText().toString();
+                        MainActivity.this.password = passInput.getText().toString();
                         //Save to preference
                         getSharedPreferences("PREFERENCE", MODE_PRIVATE)
                                 .edit()
-                                .putString("user", userInput.getText().toString())
+                                .putString("username", userInput.getText().toString())
                                 .commit();
 
                         getSharedPreferences("PREFERENCE", MODE_PRIVATE)
                                 .edit()
-                                .putString("pass", passInput.getText().toString())
+                                .putString("password", passInput.getText().toString())
                                 .commit();
+                        authenticate();
                     }
                 }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 // Do nothing.
             }
         }).show();
+        //Get User Login
+        MainActivity.this.username = getSharedPreferences("PREFERENCE", MODE_PRIVATE).getString("username","");
+        MainActivity.this.password = getSharedPreferences("PREFERENCE", MODE_PRIVATE).getString("password","");
     }
     public void authenticate(){
-        new AsyncTask<Void, Void, Void>() {
+        new AsyncTask<Void, Void, String>() {
             HttpResponse response;
             InputStream inputStream = null;
             String result = "";
@@ -311,7 +309,7 @@ public class MainActivity extends Activity {
             protected void onPreExecute(){
                 HttpConnectionParams.setConnectionTimeout(client.getParams(), 10000);
             }
-            protected Void doInBackground(Void... voids) {
+            protected String doInBackground(Void... voids) {
                 //Website URL and header configuration
                 String website = "https://olinapps.herokuapp.com/api/exchangelogin";
                 HttpPost get_auth = new HttpPost(website);
@@ -320,8 +318,8 @@ public class MainActivity extends Activity {
                 //Create and execute POST with JSON Post Package
                 JSONObject auth = new JSONObject();
                 try{
-                    auth.put("username",MainActivity.this.user);
-                    auth.put("password",MainActivity.this.pass);
+                    auth.put("username",MainActivity.this.username);
+                    auth.put("password",MainActivity.this.password);
                     StringEntity se = new StringEntity(auth.toString());
                     se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,"application/json"));
                     get_auth.setEntity(se);
@@ -342,11 +340,26 @@ public class MainActivity extends Activity {
                     result = sb.toString();}catch(Exception e){e.printStackTrace();}
 
                 //Convert Result to JSON
-
-                return null;
+                String username = "";
+                try{
+                    auth = new JSONObject(result);
+                    JSONObject userID = auth.getJSONObject("user");
+                    username = userID.getString("id");
+                }catch(Exception e){e.printStackTrace();}
+                return username;
+            }
+            protected void onPostExecute(String fullName){
+                MainActivity.this.fullName = fullName;
+                //Save FullName
+                getSharedPreferences("PREFERENCE", MODE_PRIVATE)
+                        .edit()
+                        .putString("fullName", MainActivity.this.fullName)
+                        .commit();
+                Toast.makeText(MainActivity.this, "You have logged in as " + MainActivity.this.fullName, Toast.LENGTH_LONG).show();
             }
         }.execute();
-    } //Unimplemented
+    }
+
     //Getting Courses
     public ArrayList<String> getUnique (ArrayList<String> raw){
         LinkedHashSet<String> unique = new LinkedHashSet<String>(raw);
@@ -355,8 +368,6 @@ public class MainActivity extends Activity {
     public void getCourses(){
         String rawString = getSharedPreferences("PREFERENCE", MODE_PRIVATE).getString("courses", "");
         //Check if Initial "" is at the beginning
-        //Log.i("COURSE ERROR","Something might be wrong with the courses string.");
-        Log.i("RawString",rawString);
         if (rawString.equals(""))
             this.courses = new ArrayList<String>();
         else
@@ -384,7 +395,7 @@ public class MainActivity extends Activity {
                         if (newCourse.length() < 1) {
                             Toast.makeText(MainActivity.this,"Give the course a name!",Toast.LENGTH_LONG).show();
                             dialog.dismiss();
-                        }
+                        } else Toast.makeText(MainActivity.this, "You have successfully added " + newCourse, Toast.LENGTH_LONG).show();
 
                         //Add course to server, if it doesn't exist on the server
                         if (!databaseCourses.contains(newCourse))
@@ -402,6 +413,7 @@ public class MainActivity extends Activity {
                 // Do nothing.
             }
         }).show();
+
     }
     public void addCourseToServer(String addCourse){
         //Post Request to Server...
@@ -410,20 +422,24 @@ public class MainActivity extends Activity {
     //Repopulate Views
     public void rePopulate(){
         db.open();
+        getUser();
         getCourses();
         getUserSessions();
         getCourseSessions();
-
-        taskAdapter = new TaskListAdapter(this, this.userSessions);
-        upcomingSessions.setAdapter(taskAdapter);
-        expAdapter.refill(MainActivity.this.courses,MainActivity.this.courseSessions);
-
+        Log.i("Username",MainActivity.this.fullName);
+        if (!MainActivity.this.fullName.equals(""))
+        {
+            sessionAdapter = new SessionListAdapter(this, this.userSessions);
+            upcomingSessions.setAdapter(sessionAdapter);
+            expAdapter.refill(MainActivity.this.courses,MainActivity.this.courseSessions);
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+        menu.getItem(0).setTitle("Logged in as: " + MainActivity.this.fullName);
         return true;
     }
 
@@ -475,6 +491,7 @@ public class MainActivity extends Activity {
                 return true;
 
             case R.id.action_change_user:
+                item.setTitle("Logged in as: " + MainActivity.this.fullName);
                 userLogin();
                 return true;
         }

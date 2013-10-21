@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -15,14 +14,15 @@ public class DBHandler {
     private DBModel model;
     private SQLiteDatabase database;
 
-    private String[] allColumns = {DBModel.TASK_ID,
-            DBModel.TASK_NAME,
-            DBModel.TASK_PEOPLE,
-            DBModel.TASK_START,
-            DBModel.TASK_END,
-            DBModel.TASK_DATE,
-            DBModel.TASK_LOCATION,
-            DBModel.TASK_CLASS};
+    private String[] allColumns = {DBModel.SESSION_ID,
+            DBModel.SESSION_NAME,
+            DBModel.SESSION_PEOPLE,
+            DBModel.SESSION_START,
+            DBModel.SESSION_END,
+            DBModel.SESSION_DATE,
+            DBModel.SESSION_LOCATION,
+            DBModel.SESSION_CLASS
+    };
 
     //Default Constructor
     public DBHandler(Context context){
@@ -32,68 +32,65 @@ public class DBHandler {
     public void deleteSessions(){
         database.delete(DBModel.TABLE_NAME,null,null);
     }
-    //Add a new Task
-    public void addTask(Task task){
+    //Add a new Session
+    public void addSession(Session session){
         ContentValues values = new ContentValues();
-        Log.i("add?", "task add in DBHandler");
-        //Unpacking data from Task
-        values.put(DBModel.TASK_ID,task.getId());
-        values.put(DBModel.TASK_NAME,task.getName());
-        values.put(DBModel.TASK_PEOPLE,task.getPeople());
-        values.put(DBModel.TASK_DATE,task.getDate());
-        values.put(DBModel.TASK_START,task.getStart());
-        values.put(DBModel.TASK_END,task.getEnd());
-        values.put(DBModel.TASK_LOCATION,task.getLocation());
-        values.put(DBModel.TASK_CLASS,task.getClassName());
+        //Unpacking data from Session
+        values.put(DBModel.SESSION_ID, session.getId());
+        values.put(DBModel.SESSION_NAME, session.getName());
+        values.put(DBModel.SESSION_PEOPLE, session.getPeople());
+        values.put(DBModel.SESSION_DATE, session.getDate());
+        values.put(DBModel.SESSION_START, session.getStart());
+        values.put(DBModel.SESSION_END, session.getEnd());
+        values.put(DBModel.SESSION_LOCATION, session.getLocation());
+        values.put(DBModel.SESSION_CLASS, session.getClassName());
         database.insert(DBModel.TABLE_NAME, null, values);
     }
 
-    //Get Only Specific Tasks by Course
-    public ArrayList<Task> getCourseSessions(String course){
-        ArrayList<Task> allTasks = new ArrayList<Task>();
-        Log.i("add?", "get course tasks");
-        Cursor cursor = database.query(DBModel.TABLE_NAME,allColumns, DBModel.TASK_CLASS + " like '%" + course + "%'", null, null, null, null);
+    //Get Only Specific Sessions by Course
+    public ArrayList<Session> getCourseSessions(String course){
+        ArrayList<Session> allSessions = new ArrayList<Session>();
+        Cursor cursor = database.query(DBModel.TABLE_NAME,allColumns, DBModel.SESSION_CLASS + " like '%" + course + "%'", null, null, null, null);
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()){
-            allTasks.add(cursorToTask(cursor));
+            allSessions.add(cursorToSession(cursor));
             cursor.moveToNext();
-            Log.v("CURSOR","GETTING A CURSOR");
         }
 
         cursor.close();
-        return allTasks;
+        return allSessions;
     }
 
-    //Get Task by ID
-    public Task getTaskById(String id){
-        Cursor cursor = database.query(DBModel.TABLE_NAME,allColumns,DBModel.TASK_ID + " like '%" + id + "%'",null,null,null,null);
+    //Get Session by ID
+    public Session getSessionById(String id){
+        Cursor cursor = database.query(DBModel.TABLE_NAME,allColumns,DBModel.SESSION_ID + " like '%" + id + "%'",null,null,null,null);
         cursor.moveToFirst();
-        Task task = (cursorToTask(cursor));
+        Session session = (cursorToSession(cursor));
         cursor.close();
-        return task;
+        return session;
     }
 
-    public void updateTask(Task task){
-        database.delete(DBModel.TABLE_NAME,DBModel.TASK_ID + " like '%" + task.getId() + "%'",null);
-        addTask(task);
+    public void updateSession(Session session){
+        database.delete(DBModel.TABLE_NAME,DBModel.SESSION_ID + " like '%" + session.getId() + "%'",null);
+        addSession(session);
     }
-    //Get Only Specific Tasks by User
-    public ArrayList<Task> getUserSessions(String user){
-        ArrayList<Task> allTasks = new ArrayList<Task>();
-        Cursor cursor = database.query(DBModel.TABLE_NAME,allColumns, DBModel.TASK_PEOPLE + " like '%" + user + "%'", null, null, null, null);
+    //Get Only Specific Sessions by User
+    public ArrayList<Session> getUserSessions(String user){
+        ArrayList<Session> allSessions = new ArrayList<Session>();
+        Cursor cursor = database.query(DBModel.TABLE_NAME,allColumns, DBModel.SESSION_PEOPLE + " like '%" + user + "%'", null, null, null, null);
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()){
-            allTasks.add(cursorToTask(cursor));
+            allSessions.add(cursorToSession(cursor));
             cursor.moveToNext();
         }
         cursor.close();
-        return allTasks;
+        return allSessions;
     }
 
-    public Task cursorToTask(Cursor cursor){
-        return new Task(
+    public Session cursorToSession(Cursor cursor){
+        return new Session(
                 cursor.getString(0),
                 cursor.getString(1),
                 cursor.getString(2),

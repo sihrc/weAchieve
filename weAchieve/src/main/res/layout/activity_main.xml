@@ -11,7 +11,7 @@
     >
 
     <TextView
-        android:id = "@+id/taskHeader"
+        android:id ="@+id/sessionHeader"
         android:layout_width = "fill_parent"
         android:layout_height = "wrap_content"
         android:layout_alignParentTop="true"
@@ -24,7 +24,7 @@
         android:layout_height = "30dp"
         android:background="@android:color/transparent"
         android:text = "@string/more_main"
-        android:layout_alignBaseline="@id/taskHeader"
+        android:layout_alignBaseline="@id/sessionHeader"
         android:gravity = "bottom"
         android:textSize = "@dimen/main_subheading"
         android:textColor = "#a9a9a9"
@@ -33,24 +33,24 @@
         />
 
     <View
-        android:id = "@+id/divider_task"
+        android:id = "@+id/divider_session"
         android:layout_width="fill_parent"
         android:layout_height="2dp"
-        android:layout_below = "@id/taskHeader"
+        android:layout_below = "@id/sessionHeader"
         android:layout_marginBottom="5dp"
         android:background="@android:color/black">
     </View>
 
     <ListView
-        android:id = "@+id/upcomingTasks"
+        android:id = "@+id/upcomingSessions"
         android:layout_width = "fill_parent"
         android:layout_height = "@dimen/upcoming_height"
-        android:layout_below="@id/divider_task"
+        android:layout_below="@id/divider_session"
         />
 
     <TextView
         android:id="@+id/courseTitle"
-        android:layout_below="@id/upcomingTasks"
+        android:layout_below="@id/upcomingSessions"
         android:layout_height = "wrap_content"
         android:layout_width = "wrap_content"
         android:text = "@string/courses_main"
@@ -67,7 +67,7 @@
     </View>
 
     <ExpandableListView
-        android:id = "@+id/allTasks"
+        android:id = "@+id/allSessions"
         android:layout_width = "fill_parent"
         android:layout_height = "wrap_content"
         android:layout_below = "@id/divider_course"

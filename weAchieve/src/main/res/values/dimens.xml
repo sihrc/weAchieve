@@ -7,5 +7,5 @@
     <dimen name="main_subheading">15sp</dimen>
     <dimen name="upcoming_height">120dp</dimen>
 
-    <dimen name="taskitem_height">60dp</dimen>
+    <dimen name="sessionitem_height">60dp</dimen>
 </resources>
